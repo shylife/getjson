@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.test);
         mTextViewResult = (TextView)findViewById(R.id.test1);
         MyAsynctask task = new MyAsynctask();
-        task.execute("http://192.168.0.201:5000/Android/getjson.php");
+        task.execute("http://192.168.0.201:5000/Android/getjson.php","name","job","many");
         // 안드로이드 스튜디오 Emulator 로는 localhost:포트번호 접근이 불가능하다.
         // + 안드로이드는 기본적으로 HTTP conn 을 금지한다 - manifest 수정이 필요.
     }
@@ -65,20 +65,17 @@ public class MainActivity extends AppCompatActivity {
             super.onPreExecute();
         }
         @Override
-        protected String doInBackground(String ... strings){
+        protected String doInBackground(String... strings){
             // 서브스레드로 처리되는 곳.
             String serverURL = (String) strings[0];
-/*
             String key = (String) strings[1];
-            String value = (String) strings[2];
+            String key2 = (String) strings[2];
+            String key3 = (String) strings[3];
 
-            String key2 = (String) strings[3];
-            String value2 = (String) strings[4];
-
-            String key3 = (String) strings[5];
-            String value3 = (String) strings[6];
- */
             String postParameters = "";
+            // 전달할 post 문장 만들기 (postParameters)
+
+            String json = "";
             try {
                 // 2. HttpURLConnection 클래스를 사용하여 POST 방식으로 데이터를 전송합니다.
                 URL url = new URL(serverURL); // 주소가 저장된 변수를 이곳에 입력합니다.
@@ -89,11 +86,31 @@ public class MainActivity extends AppCompatActivity {
 
                 httpURLConnection.setConnectTimeout(5000); //5초안에 연결이 안되면 예외가 발생합니다.
 
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("que1", key);
+                    jsonObject.put("que2", key2);
+                    jsonObject.put("que3", key3);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                json = jsonObject.toString();
+                Log.e("json", "생성한 json : " + jsonObject.toString());
+
+                // Set some headers to inform server about the type of the content
+                httpURLConnection.setRequestProperty("Accept", "application/json");
+                httpURLConnection.setRequestProperty("Content-type", "application/json");
+                // OutputStream으로 POST 데이터를 넘겨주겠다는 옵션.
+                httpURLConnection.setDoOutput(true);
+                // InputStream으로 서버로 부터 응답을 받겠다는 옵션.
+                httpURLConnection.setDoInput(true);
+
+
                 httpURLConnection.setRequestMethod("POST"); //요청 방식을 POST로 합니다.
                 httpURLConnection.connect();
 
                 OutputStream outputStream = httpURLConnection.getOutputStream();
-                outputStream.write(postParameters.getBytes("UTF-8")); //전송할 데이터가 저장된 변수를 이곳에 입력합니다.
+                outputStream.write(json.getBytes("UTF-8")); //전송할 데이터가 저장된 변수를 이곳에 입력합니다.
 
                 outputStream.flush();
                 outputStream.close();

@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG_ADDRESS ="many";
 
     private static TextView mTextViewResult;
-    private static TextView mTextTest;
+    //private static TextView mTextTest;
     ArrayList<HashMap<String, String>> mArrayList;
     ListView mlistView;
     String mJsonString;
@@ -41,9 +41,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.test);
-        mTextViewResult = (TextView)findViewById(R.id.test1);
-        mTextTest = (TextView)findViewById(R.id.test2);
+        setContentView(R.layout.activity_main);
+        mTextViewResult = (TextView)findViewById(R.id.textView_main_result);
+        //mTextTest = (TextView)findViewById(R.id.listView_main_list);
         MyAsynctask task = new MyAsynctask();
         task.execute("http://192.168.0.201:5000/Android/getjson.php","NAME","JOB","MANY");
         // 안드로이드 스튜디오 Emulator 로는 localhost:포트번호 접근이 불가능하다.
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                                 + testList.get(i).getTest2() + "   "
                                 + testList.get(i).getTest3() + "\n";
             }
-            mTextTest.setText(ganfan);
+            //mTextTest.setText(ganfan);
         }
 
     }

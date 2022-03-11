@@ -2,22 +2,15 @@ package com.example.getjson;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -25,7 +18,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -39,10 +31,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG_ADDRESS ="many";
 
     private static TextView mTextViewResult;
+    private static TextView mTextTest;
     ArrayList<HashMap<String, String>> mArrayList;
     ListView mlistView;
     String mJsonString;
-
+    static ArrayList<Test> testList = new ArrayList<Test>();
 
 
     @Override
@@ -50,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.test);
         mTextViewResult = (TextView)findViewById(R.id.test1);
+        mTextTest = (TextView)findViewById(R.id.test2);
         MyAsynctask task = new MyAsynctask();
         task.execute("http://192.168.0.201:5000/Android/getjson.php","NAME","JOB","MANY");
         // 안드로이드 스튜디오 Emulator 로는 localhost:포트번호 접근이 불가능하다.
@@ -153,12 +147,44 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         protected void onPostExecute(String result) {
+            String ganfan = "";
             super.onPostExecute(result);
 
             //progressDialog.dismiss();
             mTextViewResult.setText(result);
+            testJSONParsing(result);
             Log.d(TAG, "POST response  - " + result);
+            for(int i=0; i<testList.size();i++){
+                ganfan = ganfan + testList.get(i).getTest1() + "   "
+                                + testList.get(i).getTest2() + "   "
+                                + testList.get(i).getTest3() + "\n";
+            }
+            mTextTest.setText(ganfan);
         }
 
+    }
+
+    private static void testJSONParsing(String json) // Json 포맷의 String형 변수를 넘겨줌.
+    {
+        try{
+            JSONObject jsonObject = new JSONObject(json);
+
+            JSONArray testArray = jsonObject.getJSONArray("Test");
+
+            for(int i=0; i<testArray.length(); i++)
+            {
+                JSONObject movieObject = testArray.getJSONObject(i);
+
+                Test test = new Test();
+
+                test.setTest1(movieObject.getString("name"));
+                test.setTest2(movieObject.getString("job"));
+                test.setTest3(movieObject.getString("many"));
+
+                testList.add(test);
+            }
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

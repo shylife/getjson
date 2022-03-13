@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG_ADDRESS ="many";
 
     private static TextView mTextViewResult;
-    //private static TextView mTextTest;
+    private static TextView mTextTest;
     ArrayList<HashMap<String, String>> mArrayList;
     ListView mlistView;
     String mJsonString;
@@ -43,9 +43,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTextViewResult = (TextView)findViewById(R.id.textView_main_result);
-        //mTextTest = (TextView)findViewById(R.id.listView_main_list);
+        mTextTest = (TextView)findViewById(R.id.listView_main_list);
         MyAsynctask task = new MyAsynctask();
-        task.execute("http://192.168.0.201:5000/Android/getjson.php","NAME","JOB","MANY");
+        task.execute("http://192.168.0.201:5000/Android/getjson.php","NAME","JOB","MANY","END");
         // 안드로이드 스튜디오 Emulator 로는 localhost:포트번호 접근이 불가능하다.
         // + 안드로이드는 기본적으로 HTTP conn 을 금지한다 - manifest 수정이 필요.
     }
@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
             String key1 = (String) strings[1];
             String key2 = (String) strings[2];
             String key3 = (String) strings[3];
+            String key4 = (String) strings[4];
 
             String postParameters = "";
             // 전달할 post 문장 만들기 (postParameters)
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
                     jsonObject.put("key1", key1);
                     jsonObject.put("key2", key2);
                     jsonObject.put("key3", key3);
+                    jsonObject.put("key4", key4);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -151,15 +153,18 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(result);
 
             //progressDialog.dismiss();
-            mTextViewResult.setText(result);
-            testJSONParsing(result);
-            Log.d(TAG, "POST response  - " + result);
+            Log.d(TAG, "POST response  - " + result);  // POST response = result..json(String)
+            mTextViewResult.setText(result); // 응답 json String 출력.
+            //파싱전
+            testJSONParsing(result); // String result json ->> json object ->> testList<json>
+            //파싱후
             for(int i=0; i<testList.size();i++){
                 ganfan = ganfan + testList.get(i).getTest1() + "   "
                                 + testList.get(i).getTest2() + "   "
-                                + testList.get(i).getTest3() + "\n";
+                                + testList.get(i).getTest3() + "   "
+                                + testList.get(i).getTest4() + "\n";
             }
-            //mTextTest.setText(ganfan);
+            mTextTest.setText(ganfan); // 응답 json (key:value) 출력.
         }
 
     }
@@ -167,19 +172,23 @@ public class MainActivity extends AppCompatActivity {
     private static void testJSONParsing(String json) // Json 포맷의 String형 변수를 넘겨줌.
     {
         try{
-            JSONObject jsonObject = new JSONObject(json);
+            JSONObject jsonObject = new JSONObject(json); // POST response -> JSONObject
 
-            JSONArray testArray = jsonObject.getJSONArray("Test");
+            JSONArray testArray = jsonObject.getJSONArray("Test"); // take JSONArray -> if name "Test"
 
             for(int i=0; i<testArray.length(); i++)
             {
                 JSONObject movieObject = testArray.getJSONObject(i);
-
                 Test test = new Test();
 
                 test.setTest1(movieObject.getString("name"));
+                Log.d(TAG, i + " - name response  - " + test.getTest1());
                 test.setTest2(movieObject.getString("job"));
+                Log.d(TAG, i + " - job response  - " + test.getTest2());
                 test.setTest3(movieObject.getString("many"));
+                Log.d(TAG, i + " - many response  - " + test.getTest3());
+                test.setTest4(movieObject.getString("end"));
+                Log.d(TAG, i + " - end response  - " + test.getTest4());
 
                 testList.add(test);
             }

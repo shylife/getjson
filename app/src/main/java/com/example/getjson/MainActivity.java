@@ -1,10 +1,15 @@
 package com.example.getjson;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -23,31 +28,38 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static String TAG = "phptest_MainActivity";
+    private static String TAG = "phptest_MainActivity";  // 디버그 서칭.
 
-    private static final String TAG_JSON="webnautes";
-    private static final String TAG_ID = "name";
-    private static final String TAG_NAME = "job";
-    private static final String TAG_ADDRESS ="many";
-
-    private static TextView mTextViewResult;
-    private static TextView mTextTest;
-    ArrayList<HashMap<String, String>> mArrayList;
-    ListView mlistView;
-    String mJsonString;
     static ArrayList<Test> testList = new ArrayList<Test>();
-
+    private static CustomAdapter mAdapter;
+    public Button buttonInsert;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mTextViewResult = (TextView)findViewById(R.id.textView_main_result);
-        mTextTest = (TextView)findViewById(R.id.listView_main_list);
+        setContentView(R.layout.test_activity_main);
+
+        buttonInsert = (Button) findViewById(R.id.button_main_insert);
         MyAsynctask task = new MyAsynctask();
         task.execute("http://192.168.0.201:5000/Android/getjson.php","NAME","JOB","MANY","END");
-        // 안드로이드 스튜디오 Emulator 로는 localhost:포트번호 접근이 불가능하다.
-        // + 안드로이드는 기본적으로 HTTP conn 을 금지한다 - manifest 수정이 필요.
+
+        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view); // 리사이클러뷰
+        LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mRecyclerView.setLayoutManager(mLinearLayoutManager); // 리사이클러뷰에 리니어레이아웃매니저를 세팅.
+
+        mAdapter = new CustomAdapter(testList);  // 어댑터를 리스트로 초기화.
+        mRecyclerView.setAdapter(mAdapter); // 리사이클러뷰에 커스텀어댑터를 세팅.
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
+                mLinearLayoutManager.getOrientation());
+        mRecyclerView.addItemDecoration(dividerItemDecoration);
+
+        buttonInsert.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                //mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     public static class MyAsynctask extends AsyncTask<String, Void, String> {
@@ -154,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
 
             //progressDialog.dismiss();
             Log.d(TAG, "POST response  - " + result);  // POST response = result..json(String)
-            mTextViewResult.setText(result); // 응답 json String 출력.
+            //mTextViewResult.setText(result); // 응답 json String 출력.
             //파싱전
             testJSONParsing(result); // String result json ->> json object ->> testList<json>
             //파싱후
@@ -164,7 +176,8 @@ public class MainActivity extends AppCompatActivity {
                                 + testList.get(i).getTest3() + "   "
                                 + testList.get(i).getTest4() + "\n";
             }
-            mTextTest.setText(ganfan); // 응답 json (key:value) 출력.
+            //mTextTest.setText(ganfan); // 응답 json (key:value) 출력.
+            mAdapter.notifyDataSetChanged();
         }
 
     }
